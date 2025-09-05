@@ -1,17 +1,44 @@
-# Price Comparison Application
+# 🛒 Price Comparison Application
 
-A Django-based web application that compares prices from South African online stores including Takealot, Game, and Makro. The application scrapes product data including images and prices, stores them in a database, and provides a user-friendly interface for comparison.
+A comprehensive Django-based web application that compares prices from South African online stores including **Takealot**, **Game**, and **Makro**. The application features advanced web scraping capabilities, beautiful responsive design, and intelligent fallback systems to ensure reliable price comparison data.
 
-## Features
+[![Django](https://img.shields.io/badge/Django-5.2.6-green.svg)](https://djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://python.org/)
+[![Selenium](https://img.shields.io/badge/Selenium-4.35.0-orange.svg)](https://selenium.dev/)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.1.3-purple.svg)](https://getbootstrap.com/)
 
+## 🚀 Live Demo
+
+**Application URL**: http://127.0.0.1:8000/  
+**Admin Panel**: http://127.0.0.1:8000/admin/ (admin/admin123)
+
+## ✨ Key Features
+
+### 🔍 **Advanced Web Scraping**
+- **Selenium WebDriver**: Handles JavaScript-heavy websites
+- **Anti-Bot Detection Bypass**: Advanced techniques to avoid detection
+- **Dynamic Content Loading**: Scrolls and loads all product data
+- **Pagination Support**: Scrapes multiple pages per store
+- **Cookie Consent Handling**: Automatically handles popups
+
+### 🛒 **Price Comparison**
 - **Multi-Store Search**: Search across Takealot, Game, and Makro simultaneously
+- **Real-Time Data**: Live scraping with intelligent fallback to sample data
 - **Product Images**: Display product images from all stores
-- **Price Comparison**: Compare prices side-by-side
 - **Price History**: Track price changes over time
-- **Product Details**: Detailed product information and specifications
-- **Responsive Design**: Mobile-friendly interface
-- **Caching**: Intelligent caching to reduce scraping load
-- **Admin Interface**: Django admin for managing data
+- **Side-by-Side Comparison**: Easy price comparison interface
+
+### 🎨 **User Experience**
+- **Responsive Design**: Mobile-friendly Bootstrap 5 interface
+- **Product Details**: Comprehensive product information and specifications
+- **Search Functionality**: Smart search with autocomplete suggestions
+- **Admin Interface**: Full Django admin for data management
+
+### ⚡ **Performance & Reliability**
+- **Intelligent Caching**: Reduces scraping load and improves performance
+- **Hybrid Scraping**: Multiple fallback strategies ensure reliable results
+- **Error Handling**: Robust error handling and retry mechanisms
+- **Database Optimization**: Efficient data storage and retrieval
 
 ## Tech Stack
 
@@ -114,15 +141,30 @@ price_comparison/
 └── manage.py            # Django management script
 ```
 
-## Scraping Architecture
+## 🏗️ Scraping Architecture
 
-The application uses a modular scraping approach:
+The application uses a sophisticated **hybrid scraping approach** with multiple layers:
 
-1. **BaseScraper**: Abstract base class with common functionality
-2. **Store-specific scrapers**: TakealotScraper, GameScraper, MakroScraper
-3. **ScraperManager**: Coordinates all scrapers
-4. **Caching**: Results are cached to avoid repeated scraping
-5. **Error handling**: Robust error handling and retry logic
+### **Level 1: Advanced Scraping (Selenium)**
+- **AdvancedScraper**: Base class with Selenium WebDriver
+- **Store-specific advanced scrapers**: Handle JavaScript and dynamic content
+- **Anti-bot techniques**: User agent rotation, random delays, headless browsing
+- **Dynamic loading**: Scrolls pages to load all content
+
+### **Level 2: Basic Scraping (BeautifulSoup)**
+- **BaseScraper**: BeautifulSoup4 for static HTML parsing
+- **Store-specific basic scrapers**: Fallback for simple sites
+- **Fast parsing**: Quick extraction when JavaScript isn't needed
+
+### **Level 3: Sample Data Fallback**
+- **Enhanced sample data**: Realistic product data for demonstration
+- **Intelligent matching**: Returns relevant products based on search query
+- **Always available**: Ensures users always get results
+
+### **Hybrid Manager**
+- **HybridScraperManager**: Orchestrates all scraping levels
+- **Intelligent fallback**: Automatically switches between methods
+- **Performance optimization**: Caches results and manages resources
 
 ## Database Models
 
