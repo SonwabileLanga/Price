@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ listing.title }} - Product Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'search_results' %}?q={{ listing.product.name }}">Search Results</a></li>
+                    <li class="breadcrumb-item active">Product Details</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6">
+            {% if listing.image_url %}
+                <img src="{{ listing.image_url }}" 
+                     class="img-fluid rounded" 
+                     alt="{{ listing.title }}"
+                     onerror="this.src='https://via.placeholder.com/500x400?text=No+Image'">
+            {% else %}
+                <img src="https://via.placeholder.com/500x400?text=No+Image" 
+                     class="img-fluid rounded" 
+                     alt="{{ listing.title }}">
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-6">
+            <h2>{{ listing.title }}</h2>
+            <p class="text-muted">{{ listing.store.name }}</p>
+            
+            <div class="mb-3">
+                {% if listing.current_price %}
+                    <h3 class="text-success">R{{ listing.current_price|floatformat:2 }}</h3>
+                    {% if listing.original_price and listing.original_price > listing.current_price %}
+                        <p class="text-muted">
+                            <s>R{{ listing.original_price|floatformat:2 }}</s>
+                            <span class="badge bg-danger ms-2">
+                                On Sale
+                            </span>
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <h3 class="text-muted">Price not available</h3>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {% if listing.is_available %}
+                    <span class="badge bg-success fs-6">Available</span>
+                {% else %}
+                    <span class="badge bg-danger fs-6">Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a href="{{ listing.url }}" 
+                   target="_blank" 
+                   class="btn btn-primary btn-lg">
+                    <i class="fas fa-external-link-alt"></i> View on {{ listing.store.name }}
+                </a>
+                
+                <button class="btn btn-outline-secondary" 
+                        onclick="addToCompare({{ listing.id }})">
+                    <i class="fas fa-balance-scale"></i> Add to Compare
+                </button>
+            </div>
+            
+            <div class="mt-4">
+                <h5>Product Information</h5>
+                <ul class="list-unstyled">
+                    <li><strong>Brand:</strong> {{ listing.product.brand|default:"Not specified" }}</li>
+                    <li><strong>Model:</strong> {{ listing.product.model|default:"Not specified" }}</li>
+                    <li><strong>Category:</strong> {{ listing.product.category|default:"Not specified" }}</li>
+                    <li><strong>Last Updated:</strong> {{ listing.last_updated|date:"M d, Y H:i" }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Price History Chart -->
+    {% if price_history %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Price History</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <canvas id="priceChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Similar Products -->
+    {% if similar_products %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Similar Products</h4>
+                <div class="row">
+                    {% for product in similar_products %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card product-card h-100">
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" 
+                                         class="card-img-top product-image" 
+                                         alt="{{ product.title }}"
+                                         onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x200?text=No+Image" 
+                                         class="card-img-top product-image" 
+                                         alt="{{ product.title }}">
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">{{ product.title|truncatechars:50 }}</h6>
+                                    <p class="text-muted">{{ product.store.name }}</p>
+                                    
+                                    <div class="mt-auto">
+                                        {% if product.current_price %}
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="price-badge">R{{ product.current_price|floatformat:2 }}</span>
+                                                {% if product.is_available %}
+                                                    <span class="badge bg-success">Available</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of Stock</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="d-grid gap-2">
+                                            <a href="{{ product.url }}" 
+                                               target="_blank" 
+                                               class="btn btn-primary btn-sm">
+                                                View on {{ product.store.name }}
+                                            </a>
+                                            <a href="{% url 'product_detail' product.id %}" 
+                                               class="btn btn-outline-secondary btn-sm">
+                                                Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Price history chart
+    {% if price_history %}
+        const priceData = {{ price_history|safe }};
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: priceData.map(item => new Date(item.recorded_at).toLocaleDateString()),
+                datasets: [{
+                    label: 'Price (R)',
+                    data: priceData.map(item => item.price),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    {% endif %}
+    
+    // Add to compare functionality
+    function addToCompare(productId) {
+        let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        
+        if (!compareList.includes(productId)) {
+            compareList.push(productId);
+            localStorage.setItem('compareList', JSON.stringify(compareList));
+            alert('Product added to compare list!');
+        } else {
+            alert('Product already in compare list!');
+        }
+    }
+</script>
+{% endblock %}
